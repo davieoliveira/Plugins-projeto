@@ -1,4 +1,4 @@
-CREATE TABLE wp_temas (
+CREATE TABLE wp_eventos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255),
     descricao TEXT,
