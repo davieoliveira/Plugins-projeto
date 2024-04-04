@@ -1,3 +1,6 @@
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<head>
 <?php
 /*
 Plugin Name: Exposição de Eventos
@@ -7,6 +10,7 @@ Author: Seu Nome
 */
 
 // Função para criar as páginas no painel de administração
+
 function criar_paginas_admin() {
     add_menu_page(
         'Gerenciador de Eventos',
@@ -94,39 +98,62 @@ function exibir_formulario_adicionar_evento() {
     <div class="wrap">
         <h1>Cadastro de Eventos</h1>
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-            <input type="hidden" name="action" value="adicionar_evento">
+           
             <!-- Campos do formulário de evento -->
+            <input type="hidden" name="action" value="adicionar_evento">           
+            <!-- Input nome do evento -->
             <label for="nome">Nome:</label><br>
-            <input type="text" id="nome" name="nome" required><br>
+            <input  class="form-control" type="text" id="nome" name="nome" placeholder="Nome do evento" required><br>
+            
+            <!-- Input descrição do evento -->
+            <label for="descricao">Descrição:</label><br>
+            <textarea class="form-control" id="exampleFormControlInput1" id="descricao" name="descricao" required></textarea>
+            
+            <br>
+
+            <!-- Seleção do Tipo -->
             <label for="tipo">Tipo:</label><br>
-            <select id="tipo" name="tipo" required>
+            <select  class="form-control" id="tipo" name="tipo" required>
                 <option value="Longa Duração">Longa Duração</option>
                 <option value="Temporária">Temporária</option>
-            </select><br>
-            <label for="descricao">Descrição:</label><br>
-            <textarea id="descricao" name="descricao" required></textarea><br>
-            <label for="inicio">Início:</label><br>
-            <input type="date" id="inicio" name="inicio" required><br>
-            <label for="fim">Fim:</label><br>
-            <input type="date" id="fim" name="fim" required><br>
+            </select>
+            
+            <br>
+
             <!-- Seleção de Tema -->
             <label for="tema">Tema:</label><br>
-            <select id="tema" name="tema" required>
+            <select class="form-control" id="tema" name="tema" required>
                 <option value="">Selecionar Tema</option>
                 <?php foreach ($temas as $tema) : ?>
                     <option value="<?php echo $tema->id; ?>"><?php echo $tema->Nome; ?></option>
                 <?php endforeach; ?>
-            </select><br>
+            </select>
+            
+            <br>
+
             <!-- Seleção de Subtema -->
             <label for="subtema">Subtema:</label><br>
-            <select id="subtema" name="subtema">
+            <select class="form-control" id="subtema" name="subtema">
                 <option value="">Selecionar Subtema</option>
                 <?php foreach ($subtemas as $subtema) : ?>
                     <option value="<?php echo $subtema->id; ?>"><?php echo $subtema->Nome; ?></option>
                 <?php endforeach; ?>
-            </select><br><br>
+            </select>
+            
+            <br>
+            
+            <!-- Data inicio -->
+            <label for="inicio">Início:</label><br>
+            <input type="date" id="inicio" name="inicio" required><br>
+            
+            <!-- Data fim -->
+            <label for="fim">Fim:</label><br>
+            <input type="date" id="fim" name="fim" required><br>
+
+            <br>
+            
             <!-- Botões para cadastrar temas e subtemas -->
-            <input type="submit" value="Adicionar Evento">
+            <input class="btn btn-primary btn-sm" type="submit" value="Adicionar Evento">
         </form>
     </div>
     <?php
@@ -138,10 +165,10 @@ function exibir_formulario_criar_tema() {
     <div class="wrap">
         <h1>Cadastro de Temas</h1>
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-tema">
-            <input type="hidden" name="action" value="criar_tema">
+            <input  type="hidden" name="action" value="criar_tema">
             <label for="nome-tema">Nome do Tema:</label><br>
-            <input type="text" id="nome-tema" name="nome-tema" required><br>
-            <input type="submit" value="Cadastrar Tema">
+            <input class="form-control" type="text" id="nome-tema" name="nome-tema" required><br>
+            <input class="btn btn-primary btn-sm" type="submit" value="Cadastrar Tema">
         </form>
     </div>
     <?php
@@ -150,11 +177,12 @@ function exibir_formulario_criar_tema() {
 // Função para exibir o formulário de adicionar subtema
 function exibir_formulario_criar_subtema() {
     ?>
+    <h1>Cadastro de subtemas</h1>
     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-subtema">
         <input type="hidden" name="action" value="criar_subtema">
         <label for="nome-subtema">Nome do Subtema:</label><br>
-        <input type="text" id="nome-subtema" name="nome-subtema" required><br>
-        <input type="submit" value="Cadastrar Subtema">
+        <input class="form-control" type="text" id="nome-subtema" name="nome-subtema" required><br>
+        <input class="btn btn-primary btn-sm" type="submit" value="Cadastrar Subtema">
     </form>
     <?php
 }
@@ -312,5 +340,3 @@ function exibir_pagina() {
     </div>
     <?php
 }
-// Adiciona um menu no painel de administração
-
