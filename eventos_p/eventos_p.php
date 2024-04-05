@@ -1,10 +1,15 @@
 <?php
-/*
-Plugin Name: Exposição de Eventos
-Description: Plugin para criação de eventos de exposição de itens.
-Version: 1.0
-Author: Seu Nome
-*/
+/**
+ * Plugin Name: gerenciador de eventos curadoriais 
+ * Description: Pluggin desenvolvido com o propósito de estudar o desenvolvimentos de pluggins wordpress.
+ * Version: 1.0
+ * Requires at least: 5.6
+ * Author: Davi Oliveira e Marcos Ribeiro
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: gerenciador-eventos
+ * Domain Path: /languages
+ */
 
 // Função para criar as páginas no painel de administração
 function criar_paginas_admin() {
@@ -140,7 +145,7 @@ function exibir_formulario_criar_tema() {
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-tema">
             <input type="hidden" name="action" value="criar_tema">
             <label for="nome-tema">Nome do Tema:</label><br>
-            <input type="text" id="nome-tema" name="nome-tema" required><br>
+            <input type="text" id="nome-tema" name="nome-tema" required><br><br>
             <input type="submit" value="Cadastrar Tema">
         </form>
     </div>
@@ -150,10 +155,12 @@ function exibir_formulario_criar_tema() {
 // Função para exibir o formulário de adicionar subtema
 function exibir_formulario_criar_subtema() {
     ?>
+    <br>
+    <h1>Cadastro de Subtemas</h1>
     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-subtema">
         <input type="hidden" name="action" value="criar_subtema">
         <label for="nome-subtema">Nome do Subtema:</label><br>
-        <input type="text" id="nome-subtema" name="nome-subtema" required><br>
+        <input type="text" id="nome-subtema" name="nome-subtema" required><br><br>
         <input type="submit" value="Cadastrar Subtema">
     </form>
     <?php
@@ -312,5 +319,30 @@ function exibir_pagina() {
     </div>
     <?php
 }
+function mostrar_eventos() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'eventos';
+    $eventos = $wpdb->get_results("SELECT * FROM $table_name");
+
+    $output = '<h2>Eventos Cadastrados</h2>';
+
+    foreach ($eventos as $evento) {
+        
+        $output .= "
+            <div class='evento-card'>
+                <h3>{$evento->nome}</h3>
+                <p><strong>Descrição:</strong> {$evento->descricao}</p>
+                <p><strong>Início:</strong> {$evento->inicio}</p>
+                <p><strong>Fim:</strong> {$evento->fim}</p>
+            </div>
+        ";
+    }
+
+    return $output;
+}
+
+add_shortcode('mostrar_eventos', 'mostrar_eventos');
+
+
 // Adiciona um menu no painel de administração
 
