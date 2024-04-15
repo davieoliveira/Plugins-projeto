@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: gerenciador de eventos curadoriais 
+ * Plugin Name: gerenciador de eventos curadoriais  P
  * Description: Pluggin desenvolvido com o propósito de estudar o desenvolvimentos de pluggins wordpress.
  * Version: 1.0
  * Requires at least: 5.6
@@ -10,6 +10,47 @@
  * Text Domain: gerenciador-eventos
  * Domain Path: /languages
  */
+// Função para criar as tabelas no banco de dados.
+function criar_tabelas_eventos() {
+    global $wpdb;
+    $charset_collate = $wpdb->get_charset_collate();
+
+    // Tabela para eventos
+    $tabela_eventos = $wpdb->prefix . 'eventos';
+    $sql_eventos = "CREATE TABLE IF NOT EXISTS $tabela_eventos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(50) NOT NULL,
+        tipo VARCHAR(50) NOT NULL,
+        descricao TEXT NOT NULL,
+        inicio DATE NOT NULL,
+        fim DATE NOT NULL,
+        tema VARCHAR(50) NOT NULL,
+        subtema VARCHAR(50)
+
+    ) $charset_collate;";
+
+    // Tabela para temas
+    $tabela_temas = $wpdb->prefix . 'temas';
+    $sql_temas = "CREATE TABLE IF NOT EXISTS $tabela_temas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(255)
+    ) $charset_collate;";
+
+    // Tabela para subtemas
+    $tabela_subtemas = $wpdb->prefix . 'subtemas';
+    $sql_subtemas = "CREATE TABLE IF NOT EXISTS $tabela_subtemas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(255)
+    ) $charset_collate;";
+
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+    // Criar tabelas
+    dbDelta( $sql_eventos );
+    dbDelta( $sql_temas );
+    dbDelta( $sql_subtemas );
+}
+register_activation_hook( __FILE__, 'criar_tabelas_eventos' );
 
 // Função para criar as páginas no painel de administração
 function criar_paginas_admin() {
@@ -119,7 +160,7 @@ function exibir_formulario_adicionar_evento() {
             <select id="tema" name="tema" required>
                 <option value="">Selecionar Tema</option>
                 <?php foreach ($temas as $tema) : ?>
-                    <option value="<?php echo $tema->id; ?>"><?php echo $tema->Nome; ?></option>
+                    <option value="<?php echo $tema->id; ?>"><?php echo $tema->nome; ?></option>
                 <?php endforeach; ?>
             </select><br>
             <!-- Seleção de Subtema -->
@@ -127,7 +168,7 @@ function exibir_formulario_adicionar_evento() {
             <select id="subtema" name="subtema">
                 <option value="">Selecionar Subtema</option>
                 <?php foreach ($subtemas as $subtema) : ?>
-                    <option value="<?php echo $subtema->id; ?>"><?php echo $subtema->Nome; ?></option>
+                    <option value="<?php echo $subtema->id; ?>"><?php echo $subtema->nome; ?></option>
                 <?php endforeach; ?>
             </select><br><br>
             <!-- Botões para cadastrar temas e subtemas -->
@@ -342,7 +383,3 @@ function mostrar_eventos() {
 }
 
 add_shortcode('mostrar_eventos', 'mostrar_eventos');
-
-
-// Adiciona um menu no painel de administração
-
