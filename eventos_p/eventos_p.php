@@ -1,7 +1,9 @@
-
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<head>
 <?php
 /**
- * Plugin Name: gerenciador de eventos curadoriais 
+ * Plugin Name: Gerenciador de eventos curadoriais 
  * Description: Pluggin desenvolvido com o propósito de estudar o desenvolvimentos de pluggins wordpress.
  * Version: 1.0
  * Requires at least: 5.6
@@ -11,6 +13,13 @@
  * Text Domain: gerenciador-eventos
  * Domain Path: /languages
  */
+
+$caminho_arquivo_funcoes = 'wp-devs\app\public\wp-content\plugins\eventos_p\subtema.php';
+
+// Verifica se o arquivo existe antes de incluí-lo
+if (file_exists($caminho_arquivo_funcoes)) {
+    require_once $caminho_arquivo_funcoes;
+}
 // Função para criar as páginas no painel de administração
 function criar_paginas_admin() {
     add_menu_page(
@@ -61,39 +70,53 @@ function exibir_formulario_adicionar_evento() {
         <input type="hidden" name="action" value="adicionar_evento">
         <!-- Campos do formulário de evento -->
         <label for="nome">Nome:</label><br>
-        <input type="text" id="nome" name="nome" required><br>
+        <input  class="form-control" type="text" id="nome" name="nome" required><br>
+        
+        <label for="descricao">Descrição:</label><br>
+        <textarea class="form-control" id="descricao" name="descricao"></textarea><br>
+        
+        <label for="inicio">Início:</label><br>
+        <input  class="form-control" type="date" id="inicio" name="inicio"required><br>
+        
+        <label for="fim">Fim:</label><br>
+        <input class="form-control" type="date" id="fim" name="fim"required><br>
+        
         <label for="tipo">Tipo:</label><br>
-        <select id="tipo" name="tipo" required>
+        <select class="form-control" id="tipo" name="tipo" required>
             <option value="">Selecionar duração </option>
             <option value="Longa Duração">Longa Duração</option>
             <option value="Temporária">Temporária</option>
         </select><br>
-        <label for="descricao">Descrição:</label><br>
-        <textarea id="descricao" name="descricao"></textarea><br>
-        <label for="inicio">Início:</label><br>
-        <input type="date" id="inicio" name="inicio"required><br>
-        <label for="fim">Fim:</label><br>
-        <input type="date" id="fim" name="fim"required><br>
+       
         <!-- Seleção de Tema -->
-        <label for="tema">Tema:</label><br>
-        <select id="tema" name="tema"required>
-            <option value="">Selecionar Tema</option>
-            <?php foreach ($temas as $tema) : ?>
-                <option value="<?php echo $tema->id; ?>"><?php echo $tema->Nome; ?></option>
-            <?php endforeach; ?>
-        </select><br>
-        <button id="open-theme-modal" type="button">Adicionar Tema</button><br><br>
+        <div class='tema-countainer'>    
+            <div class='tema-left'>
+                <label for="tema">Tema:</label><br>
+
+                <select class="form-control" id="tema" name="tema"required>
+                    <option value="">Selecionar Tema</option>
+                    <?php foreach ($temas as $tema) : ?>
+                        <option value="<?php echo $tema->id; ?>"><?php echo $tema->Nome; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            <div class='tema-right'>
+                        
+            <button class='button-add' id="open-theme-modal" type="button">+</button><br>
+        </div>
         <!-- Seleção de Subtema -->
         <label for="subtema">Subtema:</label><br>
-        <select id="subtema" name="subtema"required>
-            <option value="">Selecionar Subtema</option>
+
+        <select class="form-control" id="subtema" name="subtema"required>
+            <option value="">Selecionar Subtema</option>    
             <?php foreach ($subtemas as $subtema) : ?>
                 <option value="<?php echo $subtema->id; ?>"><?php echo $subtema->Nome; ?></option>
             <?php endforeach; ?>
-        </select><br>
-        <button id="open-subtema-modal" type="button">Adicionar Subtema</button><br><br><br><br><br><br>
+        </select>   
+        
+        <button class='button-add' id="open-subtema-modal" type="button">+</button><br><br><br><br><br><br>
+        
         <!-- Botões para cadastrar temas e subtemas -->
-        <button class="confirmar" value="Adicionar Evento">Adicionar Evento</button>
+        <button class="btn btn-primary btn-sm" value="Adicionar Evento">Adicionar Evento</button>
     </form>
 </div>
 
@@ -173,7 +196,7 @@ function exibir_tabela_eventos() {
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('Tem certeza que deseja excluir este evento?');">
                             <input type="hidden" name="action" value="excluir_evento">
                             <input type="hidden" name="evento_id" value="<?php echo $evento->id; ?>">
-                            <button type="submit" class=" button-excluir">Excluir</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
                         </form>
                     </td>
                 </tr>
@@ -309,12 +332,12 @@ function exibir_tabela_subtemas_cadastrados($subtemas) {
             <?php foreach ($subtemas as $subtema) : ?>
                 <tr>
                     <td><?php echo $subtema->id; ?></td>
-                    <td><?php echo $subtema->Nome; ?></td>
+                    <td><?php echo $subtema->nome; ?></td>
                     <td>
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                             <input type="hidden" name="action" value="excluir_subtema">
                             <input type="hidden" name="subtema_id" value="<?php echo $subtema->id; ?>">
-                            <button type="submit" class="button-excluir">Excluir</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
                         </form>
                         <!-- Adicionar aqui a opção de editar o subtema -->
                     </td>
@@ -399,12 +422,12 @@ function exibir_tabela_temas_cadastrados($temas) {
             <?php foreach ($temas as $tema) : ?>
                 <tr>
                     <td><?php echo $tema->id; ?></td>
-                    <td><?php echo $tema->Nome; ?></td>
+                    <td><?php echo $tema->nome; ?></td>
                     <td>
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                             <input type="hidden" name="action" value="excluir_tema">
                             <input type="hidden" name="tema_id" value="<?php echo $tema->id; ?>">
-                            <button type="submit" class=" button-excluir">Excluir</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
                         </form>
                     </td>
                 </tr>
