@@ -1,57 +1,11 @@
+
 <?php
-/**
- * Plugin Name: gerenciador de eventos curadoriais  P
- * Description: Pluggin desenvolvido com o propósito de estudar o desenvolvimentos de pluggins wordpress.
- * Version: 1.0
- * Requires at least: 5.6
- * Author: Davi Oliveira e Marcos Ribeiro
- * License: GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: gerenciador-eventos
- * Domain Path: /languages
- */
-// Função para criar as tabelas no banco de dados.
-function criar_tabelas_eventos() {
-    global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
+$caminho_arquivo_funcoes = 'wp-devs\app\public\wp-content\plugins\eventos_p\subtema.php';
 
-    // Tabela para eventos
-    $tabela_eventos = $wpdb->prefix . 'eventos';
-    $sql_eventos = "CREATE TABLE IF NOT EXISTS $tabela_eventos (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(50) NOT NULL,
-        tipo VARCHAR(50) NOT NULL,
-        descricao TEXT NOT NULL,
-        inicio DATE NOT NULL,
-        fim DATE NOT NULL,
-        tema VARCHAR(50) NOT NULL,
-        subtema VARCHAR(50)
-
-    ) $charset_collate;";
-
-    // Tabela para temas
-    $tabela_temas = $wpdb->prefix . 'temas';
-    $sql_temas = "CREATE TABLE IF NOT EXISTS $tabela_temas (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(255)
-    ) $charset_collate;";
-
-    // Tabela para subtemas
-    $tabela_subtemas = $wpdb->prefix . 'subtemas';
-    $sql_subtemas = "CREATE TABLE IF NOT EXISTS $tabela_subtemas (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(255)
-    ) $charset_collate;";
-
-    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-
-    // Criar tabelas
-    dbDelta( $sql_eventos );
-    dbDelta( $sql_temas );
-    dbDelta( $sql_subtemas );
+// Verifica se o arquivo existe antes de incluí-lo
+if (file_exists($caminho_arquivo_funcoes)) {
+    require_once $caminho_arquivo_funcoes;
 }
-register_activation_hook( __FILE__, 'criar_tabelas_eventos' );
-
 // Função para criar as páginas no painel de administração
 function criar_paginas_admin() {
     add_menu_page(
@@ -63,41 +17,6 @@ function criar_paginas_admin() {
         'dashicons-calendar-alt'
     );
 
-    add_submenu_page(
-        'gerenciador-eventos',
-        'Cadastro de Eventos',
-        'Cadastro de Eventos',
-        'manage_options',
-        'cadastro-eventos',
-        'exibir_formulario_adicionar_evento'
-    );
-
-    add_submenu_page(
-        'gerenciador-eventos',
-        'Eventos Cadastrados',
-        'Eventos Cadastrados',
-        'manage_options',
-        'eventos-cadastrados',
-        'exibir_tabela_eventos'
-    );
-
-    add_submenu_page(
-        'gerenciador-eventos',
-        'Cadastro de Temas',
-        'Cadastro de Temas',
-        'manage_options',
-        'cadastro-temas',
-        'exibir_formulario_criar_tema'
-    );
-
-    add_submenu_page(
-        'gerenciador-eventos',
-        'Cadastro de Subtemas',
-        'Cadastro de Subtemas',
-        'manage_options',
-        'cadastro-subtemas',
-        'exibir_formulario_criar_subtema'
-    );
 }
 add_action('admin_menu', 'criar_paginas_admin');
 
@@ -109,8 +28,6 @@ function exibir_pagina_eventos() {
         <h2 class="nav-tab-wrapper">
             <a href="?page=gerenciador-eventos&tab=eventos" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] == 'eventos' ? 'nav-tab-active' : ''; ?>">Eventos Cadastrados</a>
             <a href="?page=gerenciador-eventos&tab=cadastro" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] == 'cadastro' ? 'nav-tab-active' : ''; ?>">Cadastro de Eventos</a>
-            <a href="?page=gerenciador-eventos&tab=temas" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] == 'temas' ? 'nav-tab-active' : ''; ?>">Cadastro de Temas</a>
-            <a href="?page=gerenciador-eventos&tab=subtemas" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] == 'subtemas' ? 'nav-tab-active' : ''; ?>">Cadastro de Subtemas</a>
         </h2>
 
         <?php
@@ -118,10 +35,6 @@ function exibir_pagina_eventos() {
             exibir_formulario_adicionar_evento();
         } elseif (isset($_GET['tab']) && $_GET['tab'] == 'eventos') {
             exibir_tabela_eventos();
-        } elseif (isset($_GET['tab']) && $_GET['tab'] == 'temas') {
-            exibir_formulario_criar_tema();
-        } elseif (isset($_GET['tab']) && $_GET['tab'] == 'subtemas') {
-            exibir_formulario_criar_subtema();
         }
         ?>
     </div>
@@ -137,74 +50,167 @@ function exibir_formulario_adicionar_evento() {
     $temas = $wpdb->get_results("SELECT * FROM $table_temas");
     $subtemas = $wpdb->get_results("SELECT * FROM $table_subtemas");
     ?>
-    <div class="wrap">
-        <h1>Cadastro de Eventos</h1>
-        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-            <input type="hidden" name="action" value="adicionar_evento">
-            <!-- Campos do formulário de evento -->
-            <label for="nome">Nome:</label><br>
-            <input type="text" id="nome" name="nome" required><br>
-            <label for="tipo">Tipo:</label><br>
-            <select id="tipo" name="tipo" required>
-                <option value="Longa Duração">Longa Duração</option>
-                <option value="Temporária">Temporária</option>
-            </select><br>
-            <label for="descricao">Descrição:</label><br>
-            <textarea id="descricao" name="descricao" required></textarea><br>
-            <label for="inicio">Início:</label><br>
-            <input type="date" id="inicio" name="inicio" required><br>
-            <label for="fim">Fim:</label><br>
-            <input type="date" id="fim" name="fim" required><br>
-            <!-- Seleção de Tema -->
-            <label for="tema">Tema:</label><br>
-            <select id="tema" name="tema" required>
-                <option value="">Selecionar Tema</option>
-                <?php foreach ($temas as $tema) : ?>
-                    <option value="<?php echo $tema->id; ?>"><?php echo $tema->nome; ?></option>
-                <?php endforeach; ?>
-            </select><br>
-            <!-- Seleção de Subtema -->
-            <label for="subtema">Subtema:</label><br>
-            <select id="subtema" name="subtema">
-                <option value="">Selecionar Subtema</option>
-                <?php foreach ($subtemas as $subtema) : ?>
-                    <option value="<?php echo $subtema->id; ?>"><?php echo $subtema->nome; ?></option>
-                <?php endforeach; ?>
-            </select><br><br>
-            <!-- Botões para cadastrar temas e subtemas -->
-            <input type="submit" value="Adicionar Evento">
-        </form>
-    </div>
-    <?php
-}
+ <div class="wrap">
+    <h1>Cadastro de Eventos</h1>
+    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+        <input type="hidden" name="action" value="adicionar_evento">
+        <!-- Campos do formulário de evento -->
+        <label for="nome">Nome:</label><br>
+        <input type="text" id="nome" name="nome" required><br>
+        <label for="tipo">Tipo:</label><br>
+        <select id="tipo" name="tipo" required>
+            <option value="">Selecionar duração </option>
+            <option value="Longa Duração">Longa Duração</option>
+            <option value="Temporária">Temporária</option>
+        </select><br>
+        <label for="descricao">Descrição:</label><br>
+        <textarea id="descricao" name="descricao"></textarea><br>
+        <label for="inicio">Início:</label><br>
+        <input type="date" id="inicio" name="inicio"required><br>
+        <label for="fim">Fim:</label><br>
+        <input type="date" id="fim" name="fim"required><br>
+        <!-- Seleção de Tema -->
+        <label for="tema">Tema:</label><br>
+        <select id="tema" name="tema"required>
+            <option value="">Selecionar Tema</option>
+            <?php foreach ($temas as $tema) : ?>
+                <option value="<?php echo $tema->id; ?>"><?php echo $tema->Nome; ?></option>
+            <?php endforeach; ?>
+        </select><br>
+        <button id="open-theme-modal" type="button">Adicionar Tema</button><br><br>
+        <!-- Seleção de Subtema -->
+        <label for="subtema">Subtema:</label><br>
+        <select id="subtema" name="subtema"required>
+            <option value="">Selecionar Subtema</option>
+            <?php foreach ($subtemas as $subtema) : ?>
+                <option value="<?php echo $subtema->id; ?>"><?php echo $subtema->Nome; ?></option>
+            <?php endforeach; ?>
+        </select><br>
+        <button id="open-subtema-modal" type="button">Adicionar Subtema</button><br><br><br><br><br><br>
+        <!-- Botões para cadastrar temas e subtemas -->
+        <button class="confirmar" value="Adicionar Evento">Adicionar Evento</button>
+    </form>
+</div>
 
-// Função para exibir o formulário de adicionar tema
-function exibir_formulario_criar_tema() {
-    ?>
-    <div class="wrap">
-        <h1>Cadastro de Temas</h1>
+
+<!-- Dentro do modal de cadastro de tema -->
+<div id="add-theme-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Cadastro de Tema</h2>
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-tema">
             <input type="hidden" name="action" value="criar_tema">
             <label for="nome-tema">Nome do Tema:</label><br>
             <input type="text" id="nome-tema" name="nome-tema" required><br><br>
             <input type="submit" value="Cadastrar Tema">
         </form>
+
+        <!-- Tabela de Temas -->
+        <?php exibir_tabela_temas_cadastrados($temas); ?>
     </div>
+</div>
+
+
+<div id="add-subtema-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Cadastro de Subtema</h2>
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-subtema">
+            <input type="hidden" name="action" value="criar_subtema">
+            <label for="nome-subtema">Nome do Subtema:</label><br>
+            <input type="text" id="nome-subtema" name="nome-subtema" required><br><br>
+            <input type="submit" value="Cadastrar Subtema">
+        </form>
+        
+        <!-- Chamada da função para exibir a tabela de subtemas cadastrados -->
+        <?php exibir_tabela_subtemas_cadastrados($subtemas); ?>
+    </div>
+</div>
+
+
+
     <?php
 }
-
-// Função para exibir o formulário de adicionar subtema
-function exibir_formulario_criar_subtema() {
+// Função para exibir a tabela de eventos cadastrados
+function exibir_tabela_eventos() {
+    global $wpdb;
+    $table_eventos = $wpdb->prefix . 'eventos';
+    $eventos = $wpdb->get_results("SELECT * FROM $table_eventos");
     ?>
-    <br>
-    <h1>Cadastro de Subtemas</h1>
-    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-subtema">
-        <input type="hidden" name="action" value="criar_subtema">
-        <label for="nome-subtema">Nome do Subtema:</label><br>
-        <input type="text" id="nome-subtema" name="nome-subtema" required><br><br>
-        <input type="submit" value="Cadastrar Subtema">
-    </form>
+    <h2>Eventos Cadastrados</h2>
+    <table class="wp-list-table widefat fixed striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Início</th>
+                <th>Fim</th>
+                <th>Tema</th>
+                <th>Subtema</th>
+                <th>Ações</th> <!-- Adicionando uma coluna para as ações -->
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($eventos as $evento) : ?>
+                <tr>
+                    <td><?php echo $evento->id; ?></td>
+                    <td><?php echo $evento->nome; ?></td>
+                    <td><?php echo $evento->tipo; ?></td>
+                    <td><?php echo $evento->descricao; ?></td>
+                    <td><?php echo $evento->inicio; ?></td>
+                    <td><?php echo $evento->fim; ?></td>
+                    <td><?php echo obter_nome_tema_por_id($evento->tema_id); ?></td>
+                    <td><?php echo obter_nome_subtema_por_id($evento->subtema_id); ?></td>
+                    <td>
+                        <!-- Botão para excluir o evento -->
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('Tem certeza que deseja excluir este evento?');">
+                            <input type="hidden" name="action" value="excluir_evento">
+                            <input type="hidden" name="evento_id" value="<?php echo $evento->id; ?>">
+                            <button type="submit" class=" button-excluir">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
     <?php
+}
+// Função para processar a exclusão de evento
+function processar_exclusao_evento() {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'eventos';
+        $evento_id = intval($_POST['evento_id']);
+
+        $wpdb->delete(
+            $table_name,
+            array('id' => $evento_id),
+            array('%d')
+        );
+
+        wp_redirect(admin_url('admin.php?page=gerenciador-eventos&tab=eventos'));
+        exit;
+    }
+}
+
+add_action('admin_post_excluir_evento', 'processar_exclusao_evento');
+// Função auxiliar para obter o nome do tema por ID
+function obter_nome_tema_por_id($tema_id) {
+    global $wpdb;
+    $table_temas = $wpdb->prefix . 'temas';
+    $tema = $wpdb->get_row($wpdb->prepare("SELECT nome FROM $table_temas WHERE id = %d", $tema_id));
+    return $tema ? $tema->Nome : 'N/A';
+}
+
+// Função auxiliar para obter o nome do subtema por ID
+function obter_nome_subtema_por_id($subtema_id) {
+    global $wpdb;
+    $table_subtemas = $wpdb->prefix . 'subtemas';
+    $subtema = $wpdb->get_row($wpdb->prepare("SELECT nome FROM $table_subtemas WHERE id = %d", $subtema_id));
+    return $subtema ? $subtema->Nome : 'N/A';
 }
 
 // Função para processar o formulário de adicionar evento
@@ -244,25 +250,23 @@ function processar_formulario_adicionar_evento() {
 
 add_action('admin_post_adicionar_evento', 'processar_formulario_adicionar_evento');
 
-// Função para processar o formulário de cadastrar tema
-function processar_formulario_criar_tema() {
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'temas';
-
-        $nome_tema = sanitize_text_field($_POST['nome-tema']);
-
-        $wpdb->insert(
-            $table_name,
-            array('nome' => $nome_tema),
-            array('%s')
-        );
-
-        wp_redirect(admin_url('admin.php?page=gerenciador-eventos'));
-        exit;
-    }
+// subtemas
+function exibir_formulario_criar_subtema() {
+    ?>
+    <br>
+    <div class="wrap">
+        <div id="add-event-modal" class="modal">
+            <h1>Cadastro de Subtemas</h1>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-subtema">
+                <input type="hidden" name="action" value="criar_subtema">
+                <label for="nome-subtema">Nome do Subtema:</label><br>
+                <input type="text" id="nome-subtema" name="nome-subtema" required><br><br>
+                <input type="submit" value="Cadastrar Subtema">
+            </form>
+        </div>
+    </div>
+    <?php
 }
-add_action('admin_post_criar_tema', 'processar_formulario_criar_tema');
 
 // Função para processar o formulário de cadastrar subtema
 function processar_formulario_criar_subtema() {
@@ -278,45 +282,37 @@ function processar_formulario_criar_subtema() {
             array('%s')
         );
 
-        wp_redirect(admin_url('admin.php?page=gerenciador-eventos'));
+        wp_redirect(admin_url('admin.php?page=gerenciador-eventos&tab=cadastro'));
         exit;
     }
 }
-
 add_action('admin_post_criar_subtema', 'processar_formulario_criar_subtema');
 
-// Adiciona um menu no painel de administração
-// Função para exibir a tabela de eventos cadastrados
-function exibir_tabela_eventos() {
-    global $wpdb;
-    $table_eventos = $wpdb->prefix . 'eventos';
-    $eventos = $wpdb->get_results("SELECT * FROM $table_eventos");
+
+function exibir_tabela_subtemas_cadastrados($subtemas) {
     ?>
-    <h2>Eventos Cadastrados</h2>
+    <!-- Tabela de Subtemas Cadastrados -->
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Nome</th>
-                <th>Tipo</th>
-                <th>Descrição</th>
-                <th>Início</th>
-                <th>Fim</th>
-                <th>Tema</th>
-                <th>Subtema</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($eventos as $evento) : ?>
+            <?php foreach ($subtemas as $subtema) : ?>
                 <tr>
-                    <td><?php echo $evento->id; ?></td>
-                    <td><?php echo $evento->nome; ?></td>
-                    <td><?php echo $evento->tipo; ?></td>
-                    <td><?php echo $evento->descricao; ?></td>
-                    <td><?php echo $evento->inicio; ?></td>
-                    <td><?php echo $evento->fim; ?></td>
-                    <td><?php echo obter_nome_tema_por_id($evento->tema_id); ?></td>
-                    <td><?php echo obter_nome_subtema_por_id($evento->subtema_id); ?></td>
+                    <td><?php echo $subtema->id; ?></td>
+                    <td><?php echo $subtema->Nome; ?></td>
+                    <td>
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                            <input type="hidden" name="action" value="excluir_subtema">
+                            <input type="hidden" name="subtema_id" value="<?php echo $subtema->id; ?>">
+                            <button type="submit" class="button-excluir">Excluir</button>
+                        </form>
+                        <!-- Adicionar aqui a opção de editar o subtema -->
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
@@ -324,62 +320,138 @@ function exibir_tabela_eventos() {
     <?php
 }
 
-// Função auxiliar para obter o nome do tema por ID
-function obter_nome_tema_por_id($tema_id) {
-    global $wpdb;
-    $table_temas = $wpdb->prefix . 'temas';
-    $tema = $wpdb->get_row($wpdb->prepare("SELECT nome FROM $table_temas WHERE id = %d", $tema_id));
-    return $tema ? $tema->Nome : 'N/A';
-}
 
-// Função auxiliar para obter o nome do subtema por ID
-function obter_nome_subtema_por_id($subtema_id) {
-    global $wpdb;
-    $table_subtemas = $wpdb->prefix . 'subtemas';
-    $subtema = $wpdb->get_row($wpdb->prepare("SELECT nome FROM $table_subtemas WHERE id = %d", $subtema_id));
-    return $subtema ? $subtema->Nome : 'N/A';
-}
+// Função para processar a exclusão de subtema
+function processar_exclusao_subtema() {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'subtemas';
+        $subtema_id = intval($_POST['subtema_id']);
 
-// Função para exibir a página de gerenciamento de eventos
-function exibir_pagina() {
+        $wpdb->delete(
+            $table_name,
+            array('id' => $subtema_id),
+            array('%d')
+        );
+
+        wp_redirect(admin_url('admin.php?page=gerenciador-eventos&tab=cadastro'));
+        exit;
+    }
+}
+add_action('admin_post_excluir_subtema', 'processar_exclusao_subtema');
+
+
+
+//temas
+function exibir_formulario_criar_tema() {
     ?>
     <div class="wrap">
-        <h1>Gerenciador de Eventos</h1>
-        <h2 class="nav-tab-wrapper">
-            <a href="?page=gerenciador-eventos&tab=cadastro" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] == 'cadastro' ? 'nav-tab-active' : ''; ?>">Cadastro de Eventos</a>
-            <a href="?page=gerenciador-eventos&tab=eventos" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] == 'eventos' ? 'nav-tab-active' : ''; ?>">Eventos Cadastrados</a>
-        </h2>
-
-        <?php
-        if (isset($_GET['tab']) && $_GET['tab'] == 'cadastro') {
-            exibir_formulario_adicionar_evento();
-        } elseif (isset($_GET['tab']) && $_GET['tab'] == 'eventos') {
-            exibir_tabela_eventos();
-        }
-        ?>
+        <div id="add-event-modal" class="modal">
+            <h1>Cadastro de Temas</h1>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="form-criar-tema">
+                <input type="hidden" name="action" value="criar_tema">
+                <label for="nome-tema">Nome do Tema:</label><br>
+                <input type="text" id="nome-tema" name="nome-tema" required><br><br>
+                <input type="submit" value="Cadastrar Tema">
+            </form>
+        </div>
     </div>
     <?php
 }
-function mostrar_eventos() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'eventos';
-    $eventos = $wpdb->get_results("SELECT * FROM $table_name");
 
-    $output = '<h2>Eventos Cadastrados</h2>';
+// Função para processar o formulário de cadastrar tema
+function processar_formulario_criar_tema() {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'temas';
 
-    foreach ($eventos as $evento) {
-        
-        $output .= "
-            <div class='evento-card'>
-                <h3>{$evento->nome}</h3>
-                <p><strong>Descrição:</strong> {$evento->descricao}</p>
-                <p><strong>Início:</strong> {$evento->inicio}</p>
-                <p><strong>Fim:</strong> {$evento->fim}</p>
-            </div>
-        ";
+        $nome_tema = sanitize_text_field($_POST['nome-tema']);
+
+        $wpdb->insert(
+            $table_name,
+            array('nome' => $nome_tema),
+            array('%s')
+        );
+
+        wp_redirect(admin_url('admin.php?page=gerenciador-eventos&tab=cadastro'));
+        exit;
     }
-
-    return $output;
 }
 
-add_shortcode('mostrar_eventos', 'mostrar_eventos');
+
+function exibir_tabela_temas_cadastrados($temas) {
+    ?>
+    <!-- Tabela de Temas Cadastrados -->
+    <table class="wp-list-table widefat fixed striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($temas as $tema) : ?>
+                <tr>
+                    <td><?php echo $tema->id; ?></td>
+                    <td><?php echo $tema->Nome; ?></td>
+                    <td>
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                            <input type="hidden" name="action" value="excluir_tema">
+                            <input type="hidden" name="tema_id" value="<?php echo $tema->id; ?>">
+                            <button type="submit" class=" button-excluir">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php
+}
+
+
+
+
+
+add_action('admin_post_criar_tema', 'processar_formulario_criar_tema');
+// Função para processar a exclusão de tema
+function processar_exclusao_tema() {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'temas';
+        $tema_id = intval($_POST['tema_id']);
+
+        $wpdb->delete(
+            $table_name,
+            array('id' => $tema_id),
+            array('%d')
+        );
+
+        wp_redirect(admin_url('admin.php?page=gerenciador-eventos&tab=cadastro'));
+        exit;
+    }
+}
+
+add_action('admin_post_excluir_tema', 'processar_exclusao_tema');
+
+
+
+#region Função para adicionar estilos e scripts personalizados
+function adicionar_estilos_e_scripts_personalizados() {
+    // Caminho para o arquivo CSS personalizado no seu plugin
+    $custom_css_url = plugins_url('custom-styles.css', __FILE__);
+
+    // Adiciona o arquivo CSS personalizado
+    wp_enqueue_style('custom-styles', $custom_css_url);
+
+    // Caminho para o arquivo JavaScript personalizado no seu plugin
+    $custom_js_url = plugins_url('custom-script.js', __FILE__);
+
+    // Adiciona o JavaScript personalizado
+    wp_enqueue_script('custom-script', $custom_js_url, array('jquery'), '', true);
+}
+#endregion
+
+// Adiciona os estilos personalizados e JavaScript à página de administração
+add_action('admin_enqueue_scripts', 'adicionar_estilos_e_scripts_personalizados');
+?>
