@@ -1,11 +1,16 @@
 
 <?php
-$caminho_arquivo_funcoes = 'wp-devs\app\public\wp-content\plugins\eventos_p\subtema.php';
-
-// Verifica se o arquivo existe antes de incluí-lo
-if (file_exists($caminho_arquivo_funcoes)) {
-    require_once $caminho_arquivo_funcoes;
-}
+/**
+ * Plugin Name: gerenciador de eventos curadoriais 
+ * Description: Pluggin desenvolvido com o propósito de estudar o desenvolvimentos de pluggins wordpress.
+ * Version: 1.0
+ * Requires at least: 5.6
+ * Author: Davi Oliveira
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: gerenciador-eventos
+ * Domain Path: /languages
+ */
 // Função para criar as páginas no painel de administração
 function criar_paginas_admin() {
     add_menu_page(
